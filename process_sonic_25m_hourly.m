@@ -110,7 +110,7 @@ index=1;
                 T=fillmissing(T,'linear','EndValues','nearest');
                 %process sonics 20Hz
                 % Process sonic in 2-rotation coordinates
-                [MF,~,~]=thies_2r_fluxes_BHV(X,Y,Z,T,offset25,freq,ND); 
+                [MF]=thies_2r_fluxes_BHV_sample(X,Y,Z,T,offset25,freq,ND); 
                 vector_sonics25(index,:)=MF; % 28   
                 index=index+1;
             else
