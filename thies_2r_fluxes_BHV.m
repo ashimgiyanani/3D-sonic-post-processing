@@ -1,5 +1,5 @@
-function [vector_out third_order fCo_LMS_log]=thies_2r_fluxes_tauern(X,Y,Z,T,offset,freq,ND)
-% [vector_out third_order]=thies_2r_fluxes(X,Y,Z,T,status,offset)
+function [vector_out]=thies_2r_fluxes_tauern(X,Y,Z,T,offset,freq,ND)
+% [vector_out]=thies_2r_fluxes(X,Y,Z,T,status,offset)
 % Full version had: [vector_out despiking_vector flag_sonic_run std_p third_order]
 % 20Hz processing: Applies Double Rotation + calculates all relevant
 % INPUT:
@@ -11,8 +11,6 @@ function [vector_out third_order fCo_LMS_log]=thies_2r_fluxes_tauern(X,Y,Z,T,off
 % CAUTION #4: No despiking, see thies_2r_fluxes_despike
 % OUTPUT:
 % vector_out []
-% third_order []
-% fCo_LMS_log [5xND]
 
     %%%%%%%%%%%% Despike data %%%%%%%%%%%%%%%%%%%%%
     %[X ~]=despiking_number(X);
@@ -101,77 +99,5 @@ function [vector_out third_order fCo_LMS_log]=thies_2r_fluxes_tauern(X,Y,Z,T,off
     % coordinte system (aligned with gravity)
     %heat_fluxes(3)=heat_fluxes(3)+(2*(mT+273.15)/(331.3+0.606*mT)^2)*(Reynolds_stress(3)*Xm*0.75+Reynolds_stress(5)*Ym*0.75);           
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Third-order moments
-    third_order(1)=mean((U-mU).^3);                  %uuu
-    third_order(2)=mean((U-mU).^2.*(V-mV));          %uuv
-    third_order(3)=mean((U-mU).^2.*(W-mW));          %uuw
-    third_order(4)=mean((U-mU).^2.*(T-mT));          %uut
-    
-    third_order(5)=mean((U-mU).*(V-mV).^2);          %uvv
-    third_order(6)=mean((U-mU).*(V-mV).*(W-mW));     %uvw
-    third_order(7)=mean((U-mU).*(V-mV).*(T-mT));     %uvt
-    
-    third_order(8)=mean((U-mU).*(W-mW).^2);          %uww
-    third_order(9)=mean((U-mU).*(W-mW).*(T-mT));     %uwt
-    
-    third_order(10)=mean((U-mU).*(T-mT).^2);         %utt
-    
-    third_order(11)=mean((V-mV).^3);                 %vvv
-    third_order(12)=mean((V-mV).^2.*(W-mW));         %vvw
-    third_order(13)=mean((V-mV).^2.*(T-mT));         %vvt
-    third_order(14)=mean((V-mV).*(W-mW).^2);         %vww
-    third_order(15)=mean((V-mV).*(W-mW).*(T-mT));    %vwt
-    third_order(16)=mean((V-mV).*(T-mT).^2);         %vtt
-    
-    third_order(17)=mean((W-mW).^3);                 %www
-    third_order(18)=mean((W-mW).^2.*(T-mT));         %wwt
-    third_order(19)=mean((W-mW).*(T-mT).^2);         %wtt
-    
-    third_order(20)=mean((T-mT).^3);                 %ttt
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copectra calculation
-    %%%--- In general for the FFT ---%%%
-    N=length(X);                %%%--- Length of the series
-    %N=10800; % 18 HZ always, even if some values are filtered out
-    T=N/freq;                 %%%--- Total time series
-    dt=T/N;
-    time=0:dt:T-dt;
-    f=(0:N-1)/(N*dt);
-    df=1/T;
-    %%%--- for logartithmically averaging the spectra
-    fs=f(2:floor(N/2));
-    x1=logspace(log10(fs(1)),log10(fs(end)),ND);
-    psi_log=zeros(5,ND-1);
-    x2=zeros(1,ND-1);
- 
- 
-%%%--- FFT work on sonic data
-        uf=fft(U'-mU')/N;
-        vf=fft(V'-mV')/N;
-        wf=fft(W'-mW')/N;
-        Couu_LMS=2*conj(uf).*uf/df;
-        Couw_LMS=2*conj(uf).*wf/df;
-        Covv_LMS=2*conj(vf).*vf/df;
-        Covw_LMS=2*conj(vf).*wf/df;
-        Coww_LMS=2*conj(wf).*wf/df;
-        %%%--- logarithmic average of the spectra
-        for j=1:length(x1)-1
-            [~,~,bin]=histcounts(fs,[x1(j) x1(j+1)]);
-            rows=find(bin==1);
-            psi_log(1,j)=mean(Couu_LMS(1,rows));
-            psi_log(2,j)=mean(Covv_LMS(1,rows));
-            psi_log(3,j)=mean(Coww_LMS(1,rows));
-            psi_log(4,j)=mean(Couw_LMS(1,rows));
-            psi_log(5,j)=mean(Covw_LMS(1,rows));
-            x2(j)=mean(fs(rows));
-        end
-        fCo_LMS_log(1,:)=x2.*psi_log(1,:);
-        fCo_LMS_log(2,:)=x2.*psi_log(2,:);
-        fCo_LMS_log(3,:)=x2.*psi_log(3,:);
-        fCo_LMS_log(4,:)=x2.*psi_log(4,:);
-        fCo_LMS_log(5,:)=x2.*psi_log(5,:);
-        
 
     vector_out=[windvec,media,maxia,minia,Reynolds_stress,heat_fluxes,windvecstd];
