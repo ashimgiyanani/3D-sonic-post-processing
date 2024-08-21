@@ -1,4 +1,4 @@
-function [vector_out]=gill_2r_fluxes_sample(X,Y,Z,T,offset,freq)
+function vector_out=gill_2r_fluxes_sample(X,Y,Z,T,offset,freq)
 % Author: Pedro Santos
 % contat: pedro.santos@iwes.fraunhofer.de
 % [vector_out]=gill_2r_fluxes_sample(X,Y,Z,T,status,offset,ND)
@@ -10,13 +10,13 @@ function [vector_out]=gill_2r_fluxes_sample(X,Y,Z,T,offset,freq)
 % OUTPUT:
 % vector_out []
 
-    Xm=mean(X);
-    Ym=mean(Y);
-    Zm = mean(Z);
+%     Xm=mean(X);
+%     Ym=mean(Y);
+%     Zm = mean(Z);
 
     % UCAR ISFS
     Vaz=offset+90; % for Gill
-    WD=mod(nanmean(rad2deg(atan2(-Y,X))+Vaz),360);
+    WD=mod(nanmean(180/pi*(atan2(-Y,X))+Vaz),360);
     % Wind vector Means 
     Uh=nanmean(hypot(X,Y));
     Uvec=nanmean(sqrt(X.^2+Y.^2+Z.^2)); 
@@ -41,15 +41,19 @@ function [vector_out]=gill_2r_fluxes_sample(X,Y,Z,T,offset,freq)
     V=U3(2,:)';mV=mean(U3(2,:)');
     W=U3(3,:)';mW=mean(U3(3,:)');
     mT=mean(T);
-    
+
     media=  [mU, mV, mW, mT];
     maxia = [max(U), max(V), max(W), max(T)];
     minia = [min(U), min(V), min(W), min(T)];
 
     % Reynolds stress tensor in the 2R coordinate system
     Reynolds_stress=[cross_variance_linear(U,U),cross_variance_linear(U,V),cross_variance_linear(U,W),cross_variance_linear(V,V),cross_variance_linear(V,W),cross_variance_linear(W,W)];
-    
+
     % Heat fluxes in the 2R coordinate system
     heat_fluxes=[cross_variance_linear(U,T),cross_variance_linear(V,T),cross_variance_linear(W,T),cross_variance_linear(T,T)];        
 
     vector_out=[windvec,media,maxia,minia,Reynolds_stress,heat_fluxes,windvecstd];
+
+end
+
+
